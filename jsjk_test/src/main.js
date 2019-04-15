@@ -9,9 +9,7 @@ import axios from 'axios'
 import { AlertPlugin } from 'vux'
 import './iconfont/iconfont.css'
 import './permisssion'
-// dasdasadadssa
-// dsdsafvcx
-// xcffef
+
 Vue.prototype.axios = axios
 Vue.config.productionTip = false
 Vue.use(AlertPlugin)
