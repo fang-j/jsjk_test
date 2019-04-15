@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>document</title>
+  <style type="text/css">
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+  </style>
+</head>
+<body>
+<canvas id="c">dasdas</canvas>
+</body>
+<script>
+var cv =document.getElementById("c")
+var ctx = cv.getContext("2d")
+cv.width = 600;
+cv.height = 400;
+cv.style.border = "1px solid #000";
+
+// 角度转弧度
+function toRadian(angle) {
+  return angle / 180 * Math.PI;
+}
+
+// 弧度转角度
+function toAngle(radian) {
+  return radian / Math.PI * 180;
+}
+
+// 绘制饼型图（三等分）
+var x0 = 200, y0 = 200,
+  radius = 100,
+  startAngle =0,
+  step = 60;
+
+// 线绘制第一个扇形
+// 基本方式
+// ctx.fillStyle = "red";
+// ctx.moveTo(x0, y0);
+// ctx.arc(x0, y0, radius, toRadian(startAngle), toRadian(-90 + 120));
+// ctx.fill();
+
+// ctx.beginPath();
+// ctx.fillStyle = "green";
+// ctx.moveTo(x0, y0);
+// ctx.arc(x0, y0, radius, toRadian(-90 + 120), toRadian(30 + 120));
+// ctx.fill();
+
+// ctx.beginPath();
+// ctx.fillStyle = "blue";
+// ctx.moveTo(x0, y0);
+// ctx.arc(x0, y0, radius, toRadian(30 + 120), toRadian(150 + 120));
+// ctx.fill();
+
+var colors = ["red", "green", "blue","black","yellow","#66ccff"];
+colors.forEach(function(value, index) {
+  ctx.beginPath();
+
+  ctx.fillStyle = value;
+  ctx.moveTo(x0, y0);
+  ctx.arc(x0, y0, radius, toRadian(startAngle), toRadian(startAngle+=step));
+  ctx.fill();
+});
+
+</script>
+</html>

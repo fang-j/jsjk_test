@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="content-type" content="text/html;charset=gb2312"/>
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>移动端转盘指针触摸旋转</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      text-decoration: none;
+      opacity: 1;
+    }
+
+    h3, h4, h5, h6, i, b, span, strong, a {
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    a {
+      color: black;
+    }
+
+    .clear {
+      clear: both;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: "微软雅黑";
+      background: #f9f9f9;
+      overflow: hidden;
+    }
+
+    .wrapper {
+      position: relative;
+    }
+
+    #box {
+      width: 10rem;
+      height: 10rem;
+      border: 1px solid #ccc;
+      border-radius: 5rem;
+      margin: 0 auto;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    #zhen_box {
+      background: #ff6300;
+      width: 10rem;
+      height: 10rem;
+      overflow: hidden;
+      position: absolute;
+      left: 0;
+      top: 0;
+      -webkit-transform-origin: 0 100%;
+      border-radius: 50%
+    }
+
+    #zhen_box .item {
+      position: absolute;
+      transform-origin: left top;
+      left: 100px;
+      top: 100px;
+      width: 200px;
+      height: 100px;
+      border: 1px solid white;
+      box-sizing: border-box;
+    }
+
+    #zhen_box .item img {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      width: 30px;
+      height: 30px;
+      transform: skewX(-30deg) rotate(-60deg);
+    }
+
+    #zhen_box .item p {
+      position: absolute;
+      left: 30px;
+      top: 20px;
+      display: block;
+      /*transform: skewX(-30deg);*/
+    }
+    .item:nth-of-type(1) p{
+       transform: skewX(-30deg) rotate(-60deg);
+     }
+    .item:nth-of-type(2) p{
+      transform: skewX(-30deg) rotate(-120deg);
+    }
+    .item:nth-of-type(3) p{
+      transform: skewX(-30deg) rotate(-180deg);
+    }
+    .item:nth-of-type(4) p{
+      transform: skewX(-30deg) rotate(-240deg);
+    }
+    .item:nth-of-type(5) p{
+      transform: skewX(-30deg) rotate(-300deg);
+    }
+    .item:nth-of-type(6) p{
+      transform: skewX(-30deg) rotate(-360deg);
+    }
+    .center {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -40px;
+      margin-top: -40px;
+      text-align: center;
+      line-height: 80px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div id="box">
+    <div id="zhen_box" style="transform: rotate(0deg);">
+      <div class="item">
+        <!--<img src="./home-zzfw.png" alt="">-->
+        <p>1</p></div>
+      <div class="item">
+        <p>2</p>
+      </div>
+      <div class="item">
+        <p>3</p></div>
+      <div class="item">
+        <p>4</p></div>
+      <div class="item">
+        <p>5</p></div>
+      <div class="item">
+        <p>6</p>
+      </div>
+    </div>
+  </div>
+  <div class="center">测试</div>
+</div>
+</body>
+<script>
+//调节字体以及刷新
+(function (doc, win) {
+  // 绘制扇形
+  [].slice.call(document.querySelectorAll('.item'), 0).forEach(function (item, i) {
+    item.style.backgroundColor = '#' + (~~(Math.random() * (1 << 24))).toString(16)
+    item.style.transform = 'rotate(' + 360 / 6 * (i + 1) + 'deg)skewX(30deg)'
+  })
+  var docEl = doc.documentElement,
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+    recalc = function () {
+      var clientWidth = docEl.clientWidth
+      if (!clientWidth) return
+      //docEl.style.fontSize = parseInt(20 * (clientWidth / 320))+ 'px';
+      docEl.style.fontSize = '20px'
+    }
+  if (!doc.addEventListener) return
+  win.addEventListener(resizeEvt, recalc, false)
+  doc.addEventListener('DOMContentLoaded', recalc, false)
+})(document, window)
+//end
+//圆心坐标
+//var circle_centerx=160;
+//var circle_centery=140;
+var ele_zhen = document.getElementById('box')//获取指针元素
+//触摸事件
+function touches (e) {
+  var ev = window.event || event
+  switch (ev.type) {
+    case 'touchstart':
+      var oy = ev.touches[0].clientY
+      var ox = ev.touches[0].clientX
+      console.log(ox + ',' + oy)
+      document.getElementById('box').addEventListener('touchmove', touches, false)
+      break
+    case 'touchend':
+      document.getElementById('box').removeEventListener('touchmove', touches, false)
+      document.getElementById('box').removeEventListener('touchend', touches, false)
+      break
+    case 'touchmove':
+      getAngle(ev.changedTouches[0].clientX, ev.changedTouches[0].clientY)
+      break
+  }
+
+}
+
+document.getElementById('box').addEventListener('touchstart', touches, false)
+
+function getAngle (mx, my) {//获取鼠标的坐标
+  var px = 160
+  var py = 140
+  var x = Math.abs(px - mx)
+  var y = Math.abs(py - my)
+  var z = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+  var cos = y / z
+  var radina = Math.acos(cos)//用反三角函数求弧度
+  var angle = Math.floor(180 / (Math.PI / radina))//将弧度转换成角度
+
+  if (mx > px && my > py) {//鼠标在第四象限
+    angle = 180 - angle
+  }
+
+  if (mx == px && my > py) {//鼠标在y轴负方向上
+    angle = 180
+  }
+
+  if (mx > px && my == py) {//鼠标在x轴正方向上
+    angle = 90
+  }
+
+  if (mx < px && my > py) {//鼠标在第三象限
+    angle = 180 + angle
+  }
+
+  if (mx < px && my == py) {//鼠标在x轴负方向
+    angle = 270
+  }
+
+  if (mx < px && my < py) {//鼠标在第二象限
+    angle = 360 - angle
+  }
+  ele_zhen.style.transform = 'rotate(' + angle + 'deg)'
+  console.log(document.getElementsByTagName('p')[0].style.transform);
+    // document.getElementsByTagName('p')[0].style.transform = `rotate(${-60-angle}deg) skewX(-30deg)`
+  for (let i = 0; i < document.querySelectorAll('p').length; i++) {
+    document.getElementsByTagName('p')[i].style.transform = `rotate(${-60*(i+1)-angle}deg) skewX(-30deg)`
+  }
+  // console.log(document.querySelectorAll('p').length)
+  //return angle;
+}
+</script>
+</html>

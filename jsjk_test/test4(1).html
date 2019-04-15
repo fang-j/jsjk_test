@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="content-type" content="text/html;charset=gb2312"/>
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<head>
+  <title>转盘</title>
+  <meta charset="utf-8">
+  <style type="text/css">
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .box {
+      height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    .wrapper {
+      width: 200px;
+      height: 200px;
+      position: absolute;
+      background: #66CCFF;
+      left: 0;
+      top: 0;
+      transform-origin: 50% 50%;
+      overflow: hidden;
+    }
+
+    .item {
+      width: 50px;
+      height: 50px;
+      border: 1px solid;
+      position: absolute;
+      top: 0;
+      left: 0;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 50%;
+    }
+
+    .pie {
+      width: 100%;
+      height: 100%;
+      background: #ff6300;
+      border-radius: 50%;
+      overflow: hidden;
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body>
+<div class="box" >
+  <div class="wrapper">
+    <div class="pie">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+const pie = document.getElementsByClassName('pie')[0]
+const wrapper = document.getElementsByClassName('wrapper')[0]
+const item = document.getElementsByClassName('item')[0]
+const itemW = item.offsetWidth
+// // 容器中心点坐标
+const boxX = document.documentElement.clientWidth // 屏幕高宽
+const boxY = document.documentElement.clientHeight
+const wrpperW = wrapper.offsetWidth // 容器高宽
+const wrpperH = wrapper.offsetHeight
+const remX = boxX - wrpperW //盒子之外的剩余的宽度
+const remY = boxY - wrpperH //盒子之外的剩余的宽度
+
+// console.log(rem)
+// 盒子中心点x，y坐标点
+const wrapperX = wrpperW / 2
+const wrapperY = wrpperH / 2
+// console.log(wrapperX, wrapperY)
+const r = 60 // 指定半径
+const length = document.querySelectorAll('.item').length
+//角度
+const angel = 360 / length
+// 计算小圆位置
+for (let i = 0; i < length; i++) {
+  const X = Math.round(Math.cos(angel * i * (Math.PI / 180)) * r) // 算出临边的长度 相对于圆心坐标(100,100) x轴的位置（100+x，100）
+  const Y = Math.round(Math.sin(angel * i * (Math.PI / 180)) * r) // 对边的长度
+  // 26是每个小圆的一半宽高，减去26是为了使小圆的圆心正好在大圆的半径上
+  document.getElementsByClassName('item')[i].style.top = wrapperY - Y - itemW / 2 + 'px' // 算出距顶部距离，盒子一半的高度-对边高度-小盒子的1/2高度
+  document.getElementsByClassName('item')[i].style.left = wrapperX + X - itemW / 2 + 'px'
+}
+
+pie.addEventListener('touchstart', touches)
+
+var preX,preY
+var curX,curY;//本次鼠标点的坐标
+var preAngle;//上一次鼠标点与圆心(100,100)的X轴形成的角度(弧度单位)
+var transferAngle;//当前鼠标点与上一次preAngle之间变化的角度
+var angle = 0; // 旋转的角度
+// 触摸事件
+function touches (e) {
+  var ev = window.event || event
+  // console.log(ev);
+  switch (ev.type) {
+    case 'touchstart':
+      // 获取点击位置
+      preX = ev.touches[0].clientX;
+      preY = ev.touches[0].clientY;
+      //计算当前点击的点与圆心(100,100)的X轴的夹角(弧度) --> 上半圆为负(0 ~ -180), 下半圆未正[0 ~ 180]
+      preAngle = Math.atan2(preY - 100, preX - 100);
+      pie.addEventListener('touchmove', touches)
+      break
+    case 'touchend':
+      pie.removeEventListener('touchstart', touches) // 移出点击和滑动事件
+      pie.removeEventListener('touchmove', touches)
+      break
+    case 'touchmove':
+      const x = ev.changedTouches[0].clientX
+      const y = ev.changedTouches[0].clientY
+      // console.log(x,y);
+      getAngle(x, y)
+      break
+    default:
+  }
+}
+function getAngle (mx, my) {
+  // //获取鼠标的坐标
+  // // 相对于屏幕的转动转盘的圆心坐标
+  // var px = wrapper.offsetLeft + wrpperW / 2 - remX
+  // var py = wrapper.offsetTop + wrpperH / 2 - remY
+  // var x = Math.abs(px - mx)
+  // var y = Math.abs(py - my)
+  // var z = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+  // var cos = y / z
+  // var radina = Math.acos(cos)//用反三角函数求弧度
+  // var angle = Math.floor(180 / (Math.PI / radina))//将弧度转换成角度
+  // console.log(angle);
+
+  var curAngle = Math.atan2(my - 100, mx - 100);
+  transferAngle = curAngle - preAngle;
+  console.log(transferAngle)
+  angle += (transferAngle * 180 / Math.PI);
+  pie.style.transform = 'rotate(' + angle + 'deg)'
+  for (let i = 0; i < length; i++) {
+    document.getElementsByClassName('item')[i].style.transform = `rotate(${-angle}deg)`
+  }
+  preX = curX;
+  preY = curY;
+  preAngle = curAngle;
+  // if (mx > px && my > py) {//鼠标在第四象限
+  //   angle = 180 - angle
+  // }
+  //
+  // if (mx == px && my > py) {//鼠标在y轴负方向上
+  //   angle = 180
+  // }
+  //
+  // if (mx > px && my == py) {//鼠标在x轴正方向上
+  //   angle = 90
+  // }
+  //
+  // if (mx < px && my > py) {//鼠标在第三象限
+  //   angle = 180 + angle
+  // }
+  //
+  // if (mx < px && my == py) {//鼠标在x轴负方向
+  //   angle = 270
+  // }
+  //
+  // if (mx < px && my < py) {//鼠标在第二象限
+  //   angle = 360 - angle
+  // }
+  // console.log(angle);
+
+  // pie.style.transform = 'rotate(' + angle + 'deg)'
+
+}
+</script>
+
+</html>
